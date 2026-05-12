@@ -49,20 +49,25 @@ def create_ngram_transition(transitions: dict, words: list, order: int):
     return transitions
 
 
-def generate_text(transitions: dict, num_word: int):
+def generate_text(transitions: dict, order: int, num_word: int):
     output_list = []
     
     # gets a random word to start with
     key_list = list(transitions.keys())
-    current_word = random.choice(key_list)
+    state = random.choice(key_list)
 
 
-    for i in range(num_word):
-        output_list.append(random.choice(transitions[current_word]))
-        # chooses another random word from the matrix based on the previous word
-        current_word = random.choice(transitions[current_word])
+    for i in range(num_word - order):
+        if state not in transitions:
+            state = random.choice(
+                list(transitions.keys())
+            )
+            output_list.extend(list(state))
+        else:
+            output_list.append(random.choice(transitions[state]))
+            # slide the window forward
+            state = tuple(output_list[-order:])
 
-    print(output_list)
     return " ".join(output_list)
 
 ### HELPER FUNCTIONS ###
@@ -86,8 +91,8 @@ if __name__ == "__main__":
 
     transitions = create_ngram_transition(transitions, words, nth_order)
 
-    # output = generate_text(transitions, 50)
+    output = generate_text(transitions, nth_order, 50)
 
-    # # writes the output to a text file
-    # with open("output.txt", "w", encoding="utf8") as f:
-    #     f.write(output)
+    # writes the output to a text file
+    with open("output.txt", "w", encoding="utf8") as f:
+        f.write(output)
